@@ -10,10 +10,14 @@
 	<link rel="stylesheet" type="text/css" href="css/carousel.css">
 	<link rel="stylesheet" type="text/css" href="css/jquery.feedback_me.css">
 	<link title="timeline-styles" rel="stylesheet" href="https://cdn.knightlab.com/libs/timeline3/latest/css/timeline.css">
+	<link rel="stylesheet" type="text/css" href="css/copyright.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 	
 	<!-- Google Analytics -->
 	<!--<script async src="https://www.googletagmanager.com/gtag/js"></script>-->
 	<!--<script type="text/javascript" src="js/analytic-local.js"></script>-->
+	<link rel="stylesheet" type="text/css" href="css/cookieconsent.min.css" />
+	<script src="js/cookieconsent.min.js"></script>
 	<script type="text/javascript" src="js/ga.js"></script>
 </head>
 <body>
@@ -28,6 +32,7 @@
 		<li><a href="#twitter" title="Twitter advanced search"><img src="img/twitter.svg" class="icon"><br>TW. Search</a></li>
 		<li id="magnifier_tab"><a href="#magnifier" title="Image magnifier"><img src="img/magnifier.svg" class="icon"><br>Magnifier</a></li>
 		<li><a href="#metadata" title="Metadata"><img src="img/metadata.svg" class="icon"><br>Metadata</a></li>
+		<li><a href="#copyright-tab" title="Video Copyright"><img src="img/copyright.svg" class="icon"><br>Video Rights</a></li>
 		<li><a href="#forensic" title="Image Verification Assistant"><img src="img/forensic_logo.svg" class="icon"><br>Forensic</a></li>
 		<div class="navsep"></div>
 		<li><a href="#about" title="About"><img src="img/info2.svg" class="icon"><br>About</a></li>
@@ -277,6 +282,28 @@
 			<div id="preview_metadata"></div>
 			<div id="place-metadata"></div>
 		</div>
+
+		<div id="copyright-tab" class="form-action hide">
+			<h1>Check Video Copyright Status</h1>
+			<form id="copyright-form">
+				<div>
+					<input type="text" id="copyright-video_url" name="copyright-video_url"
+								 placeholder="Paste a Youtube, Twitter of Facebook video URL"/>
+					<br>
+					<br>
+				</div>
+				<input id="copyright-form_submit" type="submit" value="Submit" class="button"/>
+			</form>
+			<div id="copyright-loader" class="loader"></div>
+			<div id="copyright-content">
+				<div id="copyright-summary"></div>
+			</div>
+			<div id="copyright-error"></div>
+			<div class="copyright-footer">Developed by the GRIHO Research Group © 2018 Universitat de Lleida<br>
+				Contact: <a href="mailto:invid@udl.cat">invid@udl.cat</a>
+			</div>
+		</div>
+
 		<div id="forensic" class="form-action hide">
 			<iframe src="http://reveal-mklab.iti.gr/reveal/index.html" class="ifr" frameborder="0"></iframe>
 		</div>
@@ -357,6 +384,10 @@
 
 <!-- For Api --> 
 <script type="text/javascript" src="js/api.js"></script>
+
+<!-- For Copyright Management -->
+<script type="text/javascript" src="js/copyright.js"></script>
+<script type="text/javascript" src="js/underscore-min.js"></script>
 
 <!-- For Navigation bar -->
 <script src="js/nav.js"></script>
