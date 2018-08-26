@@ -10,6 +10,27 @@ function get_images(url){
 	return img_arr;
 }
 
+karmadecaySearch = function(word){
+	search_url = "http://karmadecay.com/index/";
+	var url = getUrlImg(word);
+	if (url != "") {
+		data = {"url": url};
+		chrome.tabs.create(
+				{url: chrome.runtime.getURL("post-redirect.html")},
+				function(tab) {
+					var handler = function(tabId, changeInfo) {
+						if(tabId === tab.id && changeInfo.status === "complete"){
+							chrome.tabs.onUpdated.removeListener(handler);
+							chrome.tabs.sendMessage(tabId, {url: search_url, data: data});
+						}
+					};
+					chrome.tabs.onUpdated.addListener(handler);
+					chrome.tabs.sendMessage(tab.id, {url: search_url, data: data});
+				}
+		);
+	}	
+}
+
 thumbnailsSearch = function(word){
 	var checkLink = "https://www.youtube.com/watch?v="
 	var url = word.linkUrl;
@@ -49,6 +70,13 @@ imageReverseSearch = function(word){
 	}
 };
 
+imageForensic = function(word){
+	var url = getUrlImg(word);
+	if (url != ""){
+		chrome.tabs.create({url:"http://reveal-mklab.iti.gr/reveal/?image=" + url});
+	}
+};
+
 imageReverseSearchBaidu = function(word){
 	var search_url = "https://image.baidu.com/n/pc_search?queryImageUrl=";
 	var url = getUrlImg(word);
@@ -73,6 +101,14 @@ imageReverseSearchTineye = function(word){
 	}
 };
 
+imageReverseSearchBing = function(word){
+	var search_url = "https://www.bing.com/images/search?q=imgurl:";
+	var url = getUrlImg(word);
+	if (url != "") {
+		chrome.tabs.create({url:search_url + url + "&view=detailv2&iss=sbi"});
+	}
+};
+
 chrome.contextMenus.create({
  title: "Youtube thumbnails reverse search",
  contexts:["link", "video"], 
@@ -82,80 +118,74 @@ chrome.contextMenus.create({
 
 chrome.contextMenus.create({
  title: "Video contextual analysis",
- contexts:["link"], 
+ contexts:["link", "video"], 
  onclick: analysisVideo,
- targetUrlPatterns: ["https://www.youtube.com/*", "https://youtu.be/*", "https://www.facebook.com/*/videos/*"] 
+ targetUrlPatterns: ["https://www.youtube.com/*", "https://youtu.be/*", "https://www.facebook.com/*/videos/*", "https://www.facebook.com/*", "https://twitter.com/*"] 
 });
 
-chrome.contextMenus.create({
+/*chrome.contextMenus.create({
  title: "Video contextual analysis",
  contexts:["video"],  
  onclick: analysisVideo, 
  targetUrlPatterns: ["https://www.youtube.com/*", "https://youtu.be/*", "https://www.facebook.com/*", "https://twitter.com/*"] 
-});
+});*/
 
 
 chrome.contextMenus.create({
  title: "Image Magnifier",
- contexts:["image"],  
- onclick: imageMagnifier
+ contexts:["image", "link"],  
+ onclick: imageMagnifier,
+// targetUrlPatterns: ["*://*/*.jpg*", "*://*/*.jpg:large", "*://*/*.jpeg*"]// ,	// "*://*/*.png*"]																			// "*://*/*.png*"]
 });
 
 chrome.contextMenus.create({
-	title: "Image Magnifier",
-	contexts: ["link"],
-	onclick: imageMagnifier,
-	targetUrlPatterns: ["*://*/*.jpg*", "*://*/*.jpg:large", "*://*/*.jpeg*"]//, "*://*/*.png*"]
-});
-
-chrome.contextMenus.create({
- title: "Image Reverse Search - Google",
- contexts:["image"],
- onclick: imageReverseSearch
+	title: "Image Forensic",
+	contexts:["image"],
+	onclick: imageForensic,
 });
 
 chrome.contextMenus.create({
  title: "Image Reverse Search - Google",
- contexts:["link"], 
+ contexts:["image", "link"],
  onclick: imageReverseSearch,
- targetUrlPatterns: ["*://*/*.jpg*", "*://*/*.jpg:large", "*://*/*.jpeg*"]//, "*://*/*.png*"]
+//targetUrlPatterns: ["*://*/*.jpg*", "*://*/*.jpg:large", "*://*/*.jpeg*"]// ,
+																			// "*://*/*.png*"]
 });
 
 chrome.contextMenus.create({
  title: "Image Reverse Search - Baidu",
- contexts:["image"],  
- onclick: imageReverseSearchBaidu 
-});
-
-chrome.contextMenus.create({
- title: "Image Reverse Search - Baidu",
- contexts:["link"],
+ contexts:["image", "link"],  
  onclick: imageReverseSearchBaidu,
- targetUrlPatterns: ["*://*/*.jpg*", "*://*/*.jpg:large", "*://*/*.jpeg*"]//, "*://*/*.png"]
+// targetUrlPatterns: ["*://*/*.jpg*", "*://*/*.jpg:large", "*://*/*.jpeg*"]// ,
+																			// "*://*/*.png"]
 });
 
 chrome.contextMenus.create({
  title: "Image Reverse Search - Yandex",
- contexts:["image"],
- onclick: imageReverseSearchYandex
-});
-
-chrome.contextMenus.create({
- title: "Image Reverse Search - Yandex",
- contexts:["link"],
+ contexts:["image", "link"],
  onclick: imageReverseSearchYandex,
- targetUrlPatterns: ["*://*/*.jpg*", "*://*/*.jpg:large", "*://*/*.jpeg*"]//, "*://*/*.png"]
+//targetUrlPatterns: ["*://*/*.jpg*", "*://*/*.jpg:large", "*://*/*.jpeg*"]// ,
+																			// "*://*/*.png"]
 });
 
 chrome.contextMenus.create({
  title: "Image Reverse Search - Tineye",
- contexts:["image"],
- onclick: imageReverseSearchTineye
-});
-
-chrome.contextMenus.create({
- title: "Image Reverse Search - Tineye",
- contexts:["link"],
+ contexts:["image", "link"],
  onclick: imageReverseSearchTineye,
- targetUrlPatterns: ["*://*/*.jpg*", "*://*/*.jpg:large", "*://*/*.jpeg*"]//, "*://*/*.png"]
+// targetUrlPatterns: ["*://*/*.jpg*", "*://*/*.jpg:large", "*://*/*.jpeg*"]// ,
+																			// "*://*/*.png"]
 });
+
+chrome.contextMenus.create({
+	title: "Image Reverse Search - Bing",
+	contexts:["image"],
+	onclick: imageReverseSearchBing,
+});
+
+chrome.contextMenus.create({
+	title: "Image Reverse Search - Reddit",
+	contexts:["image"],
+	onclick: karmadecaySearch,
+});
+
+

@@ -818,7 +818,7 @@ $(document).ready(function(){
         					 "Thanks to help us providing better tools!",
         submit_label : "Submit",
         show_asterisk_for_required: true,
-        feedback_url: YOUR_WEBHOOK_URL,
+        feedback_url: "https://hooks.slack.com/services/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",
         delayed_options: {
             send_fail : "Sending failed. Please try again.",
             send_success : "Sent successfully."
