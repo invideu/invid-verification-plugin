@@ -5,6 +5,7 @@ var twitter_url = "https://twitter.com/search";
 var tw_json = "";
 var google_reverse_search_urls = [];
 var yandex_reverse_search_urls = [];
+var error_type = "";
 
 /* Detect http link and make hyperlink */
 function urlify(text) {
@@ -128,7 +129,9 @@ function placeComments(analysis_json){
         if (index != -1){
             var elem = document.createElement("p");
             elem.setAttribute("class", "comment");
-            var author_head = '<a href="'+video_author_url_comments[count]+'"><strong>'+video_author_comments[count]+'</strong></a>'+" at <strong>" + video_publishedAt_comments[count] +"</strong>:<br>";
+            var author_head = '<a href="'+ (video_author_url_comments !== undefined ? video_author_url_comments[count] : "Unknown") +
+            	'"><strong>' + (video_author_comments !== undefined ? video_author_comments[count] : "Unknown") + '</strong></a>' + " at <strong>" +
+            	(video_publishedAt_comments !== undefined ? video_publishedAt_comments[count] : "Unknown") +"</strong>:<br>";
             elem.innerHTML = author_head + video_comments[count];
             div.appendChild(elem);
         }
@@ -171,6 +174,7 @@ function activeThumbnail(thumbnails_id){
 /* Create Carousel html*/
 function buildCarousel(carousel_id, thumbnails_id){
     var div = document.getElementById(carousel_id);
+    div.style.display = "block";
     var jssor1 = document.createElement("div");
     jssor1.setAttribute("id", "jssor_1");
     jssor1.setAttribute("style", "position:relative;margin:0 auto;top:0px;left:0px;width:800px;height:200px;overflow:hidden;visibility:hidden;background-color: #000000;");
@@ -422,8 +426,8 @@ var jsonTitleTableApi = {
                 name: ["Video id", "Video title", "Duration", "Content category", "Content tags", "Video description", "Like count", "Updated time", "Created time"]
             },
             page: {
-                title: "Page:",
-                name: ["Page", "About", "Verified account", "Category", "Link", "Fan count", "Description", "Location city", "Location country", "Website"]
+                title: "Details:",
+                name: ["Page", "Description mentioned locations", "Privacy", "Embeddable", "Facebook type"]
             },
             comment: {
                 title: "Comments",
@@ -436,8 +440,8 @@ var jsonTitleTableApi = {
                 name: ["Identifiant de la vidéo", "Titre de la vidéo", "Durée", "Catégorie du contenu", "Tag du contenu", "Description de la vidéo", "Nombre de \"j'aime\"", "Date de mise en ligne", "Date de création"]
             },
             page: {
-                title: "Page:",
-                name: ["Page", "A propos", "Compte vérifié", "Catégorie", "Lien", "Nombre de fans", "Description", "Ville", "Pays", "Site web"]
+                title: "Détails:",
+                name: ["Page", "Lieux dans la description", "Confidentialité", "Incorporé YouTube", "Type Facebook"]
             },
             comment: {
                 title: "Commentaires sur la vidéo",
@@ -449,7 +453,7 @@ var jsonTitleTableApi = {
         en: {
             video: {
                 title:"Video",
-                name: ["Identifiant", "Content", "Origin", "Likes count", "Retweets count", "Hashtags", "Urls included", "Mentionned by", "Language", "Thumbnail", "Size", "Duration", "Locations mentioned", "Created", "Video"]
+                name: ["Identifiant", "Content", "Origin", "Likes count", "Retweets count", "Hashtags", "Urls included", "Mentionned by", "Language", "Thumbnail", "Size", "Duration", "Locations mentioned", " Embedded YouTube", "Created", "Video"]
             },
             user: {
                 title: "user",
@@ -463,11 +467,11 @@ var jsonTitleTableApi = {
         fr: {
             video: {
                 title:"Vidéo",
-                name: ["Identifiant", "Contenu", "Origine", "Nombre de \"J'aime\"", "Nombre de retweets", "Hashtags", "Urls incluses", "Mentionné par", "Langue", "Imagette", "Taille", "Durée", "Lieux mentionnés", "Date de création", "Vidéo"]
+                name: ["Identifiant", "Contenu", "Origine", "Nombre de \"J'aime\"", "Nombre de retweets", "Hashtags", "Urls incluses", "Mentionné par", "Langue", "Imagette", "Taille", "Durée", "Lieux mentionnés", "Incorporé de YouTube", "Date de création", "Vidéo"]
             },
             user: {
                 title: "Utilisateur",
-                name: ["Nom", "Pseudonyme", "Localisation", "Profil", "Description", "Utilisateur protégé", "Utilisateur vérifié", "Nombre d'abonnés", "Nombre d'abonnements", "Listes", "Tweets \"aimé\"", "Nombre de tweets", "Date de création", "Langue de l'utilisateur", "Lieux mentionnés"]
+                name: ["Nom", "Pseudonyme", "Localisation", "Profil", "Description", "Utilisateur protégé", "Utilisateur vérifié", "Nombre d'abonnés", "Nombre d'abonnements", "Listes", "Tweets \"aimés\"", "Nombre de tweets", "Date de création", "Langue de l'utilisateur", "Lieux mentionnés"]
             }/*,
             comment: {
                 title: "Réponse",
@@ -476,6 +480,27 @@ var jsonTitleTableApi = {
         }
     }
 }
+
+var table_error_message = {
+    "en": {
+        "removed_video": "This video has been previously processed by the CAA service but it is no longer available on the video platform. All metadata associated with that video have been deleted",
+        "no_video": "The metadata associated with this video could not be extracted. The video is either posted by Facebook User or a Group, and due to Facebook API limitations it  cannot be processed, or it might no longer be available on Facebook",
+        "no_video_id": "A video ID cannot be extracted by the submitted URL. Please check the URL",
+        "empty_url": "The submitted URL parameter is empty. Please provide a valid video URL",
+        "facebook_group": "The provided Video is posted by a Facebook Group. Due to Facebook API restrictions no information can be retrieved for videos posted by Facebook Groups",
+        "facebook_photo": "The provided URL is not supported. It is a photo URL",
+        "default" : "There were an error while trying to process this video. Please check the link and try again."
+    },
+    "fr": {
+        "removed_video": "Cette vidéo a été précédemment traitée par le service CAA mais elle n'est maintenant plus accessible via la plateforme vidéo. Toutes les meta données de cette vidéo ont été effacées",
+        "no_video": "Les métadonnées associées à cette vidéo n'ont pas pu être extraites. La vidéo est publiée par l'utilisateur ou le groupe Facebook et, en raison des limitations de l'API Facebook, elle ne peut pas être traitée ou peut ne plus être disponible sur la plateforme vidéo.",
+        "no_video_id": "Un identifiant vidéo ne peut pas être extrait de l'URL donnée. Veuillez vérifier cette URL.",
+        "empty_url": "L'URL donnée en paramètre est vide. Veuillez utilisez une URL valide",
+        "facebook_group": "La vidéo fournie vient d'un Groupe Facebook. En raison des restrictions de l'API Facebook, aucune information ne peut être récupérée pour les vidéos postées par les Groupes Facebook.",
+        "facebook_photo": "L'URL fournie n'est pas prise en charge. C'est une URL de photo",
+        "default" : "Une erreur est survenue lors du traitement des la vidéo. Veuillez verifier le lien et réessayer."
+    }
+};
 
 var analysisType = "";
 
@@ -495,6 +520,13 @@ function parseYTJson(json){
     var jsonName = jsonTitleTableApi["youtube"][global_language];
 
     function start(json) {
+    	/* isDebunked field */
+    	/*if (json["isDebunked"] !== "") {
+    		document.getElementById("place-debunked").style.display = "block";
+            document.getElementById("place-debunked").innerHTML = json["isDebunked"];
+    	}
+        else
+        	document.getElementById("place-debunked").style.display = "none";*/
         /* Video Infos*/
         var div = document.getElementById("place-table");
         /*Video table*/
@@ -529,6 +561,13 @@ function parseYTJson(json){
     }
 
     function update(json) {
+    	/* isDebunked field */
+    	/*if (json["isDebunked"] !== "") {
+    		document.getElementById("place-debunked").style.display = "block";
+        	document.getElementById("place-debunked").innerHTML = json["isDebunked"];
+    	}
+        else
+        	document.getElementById("place-debunked").style.display = "none";*/
         var tables = document.getElementById("place-table").getElementsByTagName("table");
         /*Video table*/
         updateTable(json, key_list_video_a, tables[0]);
@@ -591,11 +630,18 @@ function parseFBJson(json){
 
     /* List of indexes */
     var key_list_video = ["video_id", "title", "length", "content_category", "content_tags", "video_description", "video_likes"];
-    var key_list_from = ["from", "from_about", "from_is_verified", "from_category", "from_link", "from_fan_count", "from_description", "from_location_city", "from_location_country", "from_website"];
+    var key_list_details = ["from", "video_description_mentioned_locations", "privacy", "embeddable", "facebook_type"];
     var key_list_count = ["total_comment_count", "num_verification_comments"];
     var arrayTitle = jsonTitleTableApi["facebook"][global_language];
 
     function start(json) {
+    	/* isDebunked field */
+    	/*if (json["isDebunked"] !== "") {
+    		document.getElementById("place-debunked").style.display = "block";
+        	document.getElementById("place-debunked").innerHTML = json["isDebunked"];
+    	}
+        else
+        	document.getElementById("place-debunked").style.display = "none";*/
         /* Video Infos*/
         var div = document.getElementById("place-table")
         /*Video table*/
@@ -609,7 +655,7 @@ function parseFBJson(json){
         div.appendChild(table);
         /*Page table*/
         makeTitle(arrayTitle.page.title, div);
-        table = make_table(json, key_list_from, arrayTitle.page.name);
+        table = make_table(json, key_list_details, arrayTitle.page.name);
         div.appendChild(table);
         /* Comments */
         makeTitle(arrayTitle.comment.title, div);
@@ -624,6 +670,13 @@ function parseFBJson(json){
     }
 
     function update(json) {
+    	/* isDebunked field */
+    	/*if (json["isDebunked"] !== "") {
+    		document.getElementById("place-debunked").style.display = "block";
+        	document.getElementById("place-debunked").innerHTML = json["isDebunked"];
+    	}
+        else
+        	document.getElementById("place-debunked").style.display = "none";*/
         var tables = document.getElementById("place-table").getElementsByTagName("table");
         /*Video table*/
         updateTable(json, key_list_video, tables[0]);
@@ -631,7 +684,7 @@ function parseFBJson(json){
         updateTimeRow(tables[0], index++, json["updated_time"]);
         updateTimeRow(tables[0], index++, json["created_time"]);
         /*Page table*/
-        updateTable(json, key_list_from, tables[1]);
+        updateTable(json, key_list_details, tables[1]);
         /* Comments */
         updateTable(json, key_list_count, tables[2]);
     }
@@ -678,7 +731,7 @@ function parseTWJson(json){
     var hasUpdateMapDesc;
 
     /* List of indexes */
-    var key_list_video = ["id_str", "full_text", "source",  "favorite_count", "retweet_count", "hashtags", "urls", "user_mentions", "lang", "media_url", "video_info_aspect_ratio", "video_info_duration", "tweet_text_mentioned_locations"];
+    var key_list_video = ["id_str", "full_text", "source",  "favorite_count", "retweet_count", "hashtags", "urls", "user_mentions", "lang", "media_url", "video_info_aspect_ratio", "video_info_duration", "tweet_text_mentioned_locations", "embedded_youtube"];
     var key_list_user = ["user_name", "user_screen_name", "user_location", "user_url", "user_description", "user_protected", "user_verified", "user_followers_count", "user_friends_count", "user_listed_count", "user_favourites_count", "user_statuses_count", "user_created_at", "user_lang", "user_description_mentioned_locations"];
     /*var key_list_comment = ["retweet_count"];*/
     var arrayTitle = jsonTitleTableApi["twitter"][global_language];
@@ -701,6 +754,13 @@ function parseTWJson(json){
     }
 
     function start(json) {
+    	/* isDebunked field */
+    	/*if (json["isDebunked"] !== "") {
+    		document.getElementById("place-debunked").style.display = "block";
+        	document.getElementById("place-debunked").innerHTML = json["isDebunked"];
+    	}
+        else
+        	document.getElementById("place-debunked").style.display = "none";*/
         /* Video Infos*/
         var div = document.getElementById("place-table")
         /*Video table*/
@@ -732,6 +792,13 @@ function parseTWJson(json){
     }
 
     function update(json) {
+    	/* isDebunked field */
+    	/*if (json["isDebunked"] !== "") {
+    		document.getElementById("place-debunked").style.display = "block";
+        	document.getElementById("place-debunked").innerHTML = json["isDebunked"];
+    	}
+        else
+        	document.getElementById("place-debunked").style.display = "none";*/
         var tables = document.getElementById("place-table").getElementsByTagName("table");
         /*Video table*/
         updateTable(json, key_list_video, tables[0]);
@@ -793,44 +860,75 @@ function parseTWJson(json){
     
 }
 
+
+function request_fail(msg) {
+    document.getElementById("api-content").style.display = "none";
+    //document.getElementById("place-debunked").style.display = "none";
+    document.getElementById("loader").style.display = "none";
+    document.getElementById("loader_tw").style.display = "none";
+    var errorElement = document.getElementById("error-content");
+    errorElement.innerHTML = msg;
+    errorElement.style.display = "block";
+}
+
 var analysisUrls = {};
 
 /* Send requests for video analysis*/
 function video_api_analysis(video_url, isProcess){
     cleanElement("fb-content");
     document.getElementById("fb-content").style.display = "none";
-    var analysis_url = "http://caa.iti.gr/verify_videoV2?url=" + video_url;
+    //Video verification V2
+    //var analysis_url = "http://caa.iti.gr/verify_videoV2?url=" + video_url;
+
+    //encode video to avoid & problem arguments
+    video_url = video_url.replace("&", "%26");
+
+    //Video verification V3
+    var analysis_url = "http://caa.iti.gr/verify_videoV3?url=" + video_url + "&twtimeline=0";
     if (isProcess)
         analysis_url += "&reprocess=1"
     loaded_tw = false;
     document.getElementById("loader").style.display = "block";
     document.getElementById("api-content").style.display = "none";
+    //document.getElementById("place-debunked").style.display = "none";
+    document.getElementById("place-carousel").style.display = "none";
     var response_done = false;
 
     /* return the error message for the error which occur */
-    function get_error_message(err) {
+    /*function get_error_message(err) {
         switch (err) {
             case "ERROR3":
             case "ERROR4":
-                return "Sorry but we cannot process this video link";
+                if (global_language == "en")
+                    return "Sorry but we cannot process this video link";
+                else if (global_language == "fr")
+                    return "Pardon, nous ne pouvons pas traiter ce lien vidéo";
             case "ERROR2":
-                return "This is a wrong url. Please check it and try again.";
+                if (global_language == "en")
+                    return "This is a wrong url. Please check it and try again.";
+                else if (global_language == "fr")
+                    return "Cet url est invalide. Veuillez verifier le lien et réessayer."
             case "share":
-                return "An error occured with the reception of Twitter shares.";
+                return "";
             case "ERROR5":
-                return "No video found in this tweet";
+                if (global_language == "en")
+                    return "No video found in this tweet";
+                else if (global_language == "fr")
+                    return "Aucune vidéo trouvée dans ce tweet"
             default:
-                return "There were an error while trying to process this video. Please check the link and try again.";
+                if (global_language == "en")
+                    return "There were an error while trying to process this video. Please check the link and try again.";
+                else if (global_language == "fr")
+                    return "Une erreur est apparue lors du traitement des la vidéo. Veuillez verifier le lien et réessayer.";
         }
-    }
+    }*/
 
     /* Get response every 2 second until process done */
     function parse_response(data, url, callback) {
         if (analysisUrls.response != url)
             return;
         callback(data);
-        if (data["processing_status"] != "done")
-        {
+        if (data["processing_status"] !== "done" && !response_done) {
             $.getJSON(url, function(data) {
                 setTimeout(function() {
                     parse_response(data, url, callback)
@@ -838,22 +936,14 @@ function video_api_analysis(video_url, isProcess){
             }).fail(function( jqxhr, textStatus, error ) {
                 console.error("parse_response : " + url);
                 console.error(textStatus + ", " + error);
-                request_fail(get_error_message(""));
+                error_type = "default";
+                request_fail(table_error_message[global_language]["default"]);
             });
         }
         else {
             response_done = true;
             document.getElementById("loader").style.display = "none";
         }
-    }
-
-    function request_fail(msg) {
-        document.getElementById("api-content").style.display = "none";
-        document.getElementById("loader").style.display = "none";
-        document.getElementById("loader_tw").style.display = "none";
-        var errorElement = document.getElementById("error-content");
-        errorElement.innerHTML = msg;
-        errorElement.style.display = "block";
     }
 
     function share_fail(msg) {
@@ -870,24 +960,25 @@ function video_api_analysis(video_url, isProcess){
     $.getJSON(analysis_url, function(data) {
         document.getElementById("api-content").style.display = "block";
         /* Error Gestion */
-        if (data["status"].startsWith("ERROR"))
+        if (table_error_message[global_language][data["status"]] !== undefined)
         {
             console.error("error return : " + analysis_url);
             console.error(data["message"]);
-            request_fail(get_error_message(data["status"]));
+            error_type = data["status"];
+            request_fail(table_error_message[global_language][data["status"]]);
             return;
         }
         $.getJSON(analysis_url, function(data) {
             /* Analysis Response */
             var url;
             var callback;
-            if (data["youtube_response"] !== undefined)
+            if (data["youtube_response"] !== null)
             { // YouTube
                 url = data["youtube_response"];
                 callback = parseYTJson;
                 analysisType = "youtube";
             }
-            else if (data["facebook_response"] !== undefined)
+            else if (data["facebook_response"] !== null)
             { // Facebook
                 url = data["facebook_response"];
                 callback = parseFBJson;
@@ -899,18 +990,22 @@ function video_api_analysis(video_url, isProcess){
                 callback = parseTWJson;
                 analysisType = "twitter";
             }
+            if (url) {
+                url = url.replace("&", "%26");	//encode & character to avoid error of arguments
+            }
             analysisUrls.response = url;
             $.getJSON(url, function(data) {
                 parse_response(data, url, callback);
             }).fail(function(jqxhr, textStatus, error) {
                 console.error("start response : " + url);
                 console.error(textStatus + ", " + error);
-                request_fail(get_error_message(""));
+                error_type = "default";
+                request_fail(table_error_message[global_language]["default"]);
             })
             /* Twitter Part response */
             var url_twitter = data["twitter_shares"];
             analysisUrls.tweets = url_twitter;
-            $.getJSON(url_twitter, function parse_tw(data) {
+            /*$.getJSON(url_twitter, function parse_tw(data) {
                 if (analysisUrls.tweets != url_twitter)
                     return;
                 tw_json = makeJSON(data);
@@ -922,7 +1017,7 @@ function video_api_analysis(video_url, isProcess){
                     }).fail(function (jqxhr, textStatus, error) {
                         console.error("parse share : " + url_twitter);
                         console.error(textStatus + ", " + error);
-                        share_fail(get_error_message("share"));
+                        share_fail(table_error_message[global_language]["default"]);
                     });
                 }
                 else {
@@ -933,17 +1028,19 @@ function video_api_analysis(video_url, isProcess){
             }).fail(function( jqxhr, textStatus, error ) {
                 console.error("start share : " + url_twitter);
                 console.error(textStatus + ", " + error);
-                share_fail(get_error_message("share"));
-            });
+                share_fail(table_error_message[global_language]["default"]);
+            });*/
         }).fail(function(jqxhr, textStatus, error) {
             console.error("get urls : " + analysis_url);
             console.error(textStatus + ", " + error);
-            request_fail(get_error_message(""));
+            error_type = "default";
+            request_fail(table_error_message[global_language]["default"]);
         });
     }).fail(function( jqxhr, textStatus, error ) {
         console.error("start analysis : " + analysis_url);
         console.error(textStatus + ", " + error);
-        request_fail(get_error_message(""));
+        error_type = "default";
+        request_fail(table_error_message[global_language]["default"]);
     });
 }
 
@@ -961,11 +1058,13 @@ function submit_form(){
     hideButtons();
 	if (url != "") {
         cleanElement("place-table");
+        //cleanElement("place-debunked");
         if (isYtUrl(url) || url.startsWith(facebook_url) || url.startsWith(twitter_url)) {
             video_api_analysis(url, reprocessChecked);
         }
         else {
             document.getElementById("api-content").style.display = "none";
+            //document.getElementById("place-debunked").style.display = "none";
             var errorElement = document.getElementById("error-content");
             errorElement.innerHTML = "Please enter a Youtube, Facebook or Twitter URL";
             errorElement.style.display = "block";
@@ -1008,7 +1107,7 @@ function convertDate(date){
     lst = String(date).split(" ");
     var new_month = "";
     var new_day = "";
-    if (lst[2].charAt(0) == "0") {
+    if (lst[2] !== undefined && lst[2].charAt(0) == "0") {
         new_day = lst[2].replace("0", "");
     }
     else {
@@ -1022,10 +1121,12 @@ function convertDate(date){
     new_date.month = new_month;
     new_date.day = new_day;
     new_date.year = lst[5];
-    var hour = lst[3].split(":");
-    new_date.hour = hour[0];
-    new_date.minute = hour[1];
-    new_date.second = hour[2];
+    if (lst[3] !== undefined) {
+    	var hour = lst[3].split(":");
+    	new_date.hour = hour[0];
+    	new_date.minute = hour[1];
+    	new_date.second = hour[2];
+	}
     return new_date;
 }
 
@@ -1097,6 +1198,9 @@ var tw_json = "";
 
 
 function updateTableLanguageAnalysis(lang) {
+    if (document.getElementById("error-content").style.display !== "none") {
+        request_fail(table_error_message[global_language][error_type]);
+    }
     if (!document.getElementById("place-table").hasChildNodes())
         return;
     var partNames = [];
@@ -1109,6 +1213,7 @@ function updateTableLanguageAnalysis(lang) {
             titles = titles.concat(jsonName["video"]["name2"]);
             titles = titles.concat(jsonName["channel"]["name"]);
             titles = titles.concat(jsonName["comment"]["name"]);
+
             break;
         case "facebook":
             var jsonName = jsonTitleTableApi["facebook"][lang];
@@ -1129,6 +1234,6 @@ function updateTableLanguageAnalysis(lang) {
     }
     $("#place-table").find("h3").html(function (index) {
         return partNames[index];
-    })
+    });
     updateTitleTable("place-table", titles);
 }

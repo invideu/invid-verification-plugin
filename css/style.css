@@ -132,6 +132,7 @@ input:-webkit-autofill {
 .button {
   font-size: 16px;
     padding: 15px 15px 15px 15px;
+    margin: 5px;
     cursor: pointer;
     border: none;
     background: #136899;
@@ -261,10 +262,36 @@ input:checked + .slider:before {
   border-radius: 50%;
 }
 
+#error-content{
+  display: none;
+  margin: 15px auto 15px;
+  padding: 20px 20px 20px;
+  width: 800px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #edece8;
+  text-align: center;
+  font-weight: bold;
+  line-height: 22px;
+}
+
+#place-debunked{
+  display: none;
+  margin: 50px auto 15px;
+  padding: 20px 20px 20px;
+  width: 650px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #edece8;
+  text-align: center;
+  font-weight: bold;
+  line-height: 22px;
+}
+
 /* Api content */
 #api-content{
   display: none;
-  margin: 50px auto 15px;
+  margin: 30px auto 15px;
   padding: 10px 50px 40px;
   width: 800px;
   border: 1px solid #ccc;
@@ -455,7 +482,7 @@ p.comment {
 #place-metadata{
   display: none;
   margin: 50px auto 15px;
-  padding: 10px 50px 40px;
+  padding: 20px 50px 20px;
   width: 800px;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -463,6 +490,20 @@ p.comment {
   text-align: center;
   line-height: 22px;
   word-break: break-all;
+}
+
+#error-metadata{
+  display: none;
+  color: red;
+  margin: 15px auto 15px;
+  padding: 20px 20px 20px;
+  width: 800px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #edece8;
+  text-align: center;
+  font-weight: bold;
+  line-height: 22px;
 }
 
 /* Raw content */
@@ -489,7 +530,8 @@ p.comment {
   color: red !important;
   font-size: 7px;
   margin: 1px;
-  position: absolute;
+  position: relative;
   font-weight: bold;
+  vertical-align: text-bottom;
   text-align: center;
 }
